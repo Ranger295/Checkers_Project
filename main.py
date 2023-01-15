@@ -5,17 +5,25 @@ import os
 import sys
 
 # brd = board
-brd = [['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
-       ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
-       ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
-       ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
-       ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
-       ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
-       ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
-       ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___']]
+clear_brd = [['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
+             ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
+             ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
+             ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
+             ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
+             ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
+             ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
+             ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___']]
+
+queen_move_variants = ['Wb_', 'W_b_', 'Wb__', 'Wb_b_', 'W_b__', 'W__b_', 'Wb_b__',
+                       'Wb__b_', 'Wb____', 'W_b_b_', 'W__b__', 'W___b_Wb_b_b_',
+                       'Wb_b___', 'Wb__b__', 'Wb___b_', 'Wb_____', 'W_b_b__',
+                       'W_b__b_', 'W_b____', 'W__b_b_', 'W___b__', 'W____b_Wb_b_b__',
+                       'Wb_b__b_', 'Wb__b_b_', 'Wb_b____', 'Wb__b___', 'Wb___b__',
+                       'Wb____b_', 'Wb______', 'W_b_b_b_', 'W_b_b___', 'W_b__b__W_b___b_',
+                       'W__b_b__', 'W__b__b_', 'W___b_b_', 'W_b_____', 'W__b____',
+                       'W___b___', 'W____b__', 'W_____b_']
 history = [0, 0, 0]
 who_moves = 'WHITE'
-
 pygame.init()
 pygame.font.init()
 size = 648, 748
@@ -127,6 +135,129 @@ def if_checker_can_beat(cell, p_m, enemy_color):
         return False
 
 
+def if_queen_can_beat(cell, p_m, enemy_color):
+    global queen_move_variants
+    can_beat = False
+    move_line_coords = []
+    move_line = ''
+    if cell[0] > p_m[0] and cell[1] > p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            move_line_coords.append(p_m)
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x += 1
+                y += 1
+                move_line += brd[y][x][1]
+                move_line_coords.append((x, y))
+            print(brd[p_m[1]][p_m[0]][1] + move_line.lower() + brd[cell[1]][cell[0]][1])
+            if brd[p_m[1]][p_m[0]][1] + move_line.lower() + brd[cell[1]][cell[0]][1] in queen_move_variants:
+                can_beat = True
+            else:
+                move_line_coords = []
+            move_line_coords.append(cell)
+    if cell[0] > p_m[0] and cell[1] < p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            move_line_coords.append(p_m)
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x += 1
+                y -= 1
+                move_line += brd[y][x][1]
+                move_line_coords.append((x, y))
+            if brd[p_m[1]][p_m[0]][1] + move_line.lower() + brd[cell[1]][cell[0]][1] in queen_move_variants:
+                can_beat = True
+            else:
+                move_line_coords = []
+            move_line_coords.append(cell)
+    if cell[0] < p_m[0] and cell[1] > p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            move_line_coords.append(p_m)
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x -= 1
+                y += 1
+                move_line += brd[y][x][1]
+                move_line_coords.append((x, y))
+            if brd[p_m[1]][p_m[0]][1] + move_line.lower() + brd[cell[1]][cell[0]][1] in queen_move_variants:
+                can_beat = True
+            else:
+                move_line_coords = []
+            move_line_coords.append(cell)
+    if cell[0] < p_m[0] and cell[1] < p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            move_line_coords.append(p_m)
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x -= 1
+                y -= 1
+                move_line += brd[y][x][1]
+                move_line_coords.append((x, y))
+            if brd[p_m[1]][p_m[0]][1] + move_line.lower() + brd[cell[1]][cell[0]][1] in queen_move_variants:
+                can_beat = True
+            else:
+                move_line_coords = []
+            move_line_coords.append(cell)
+    if can_beat:
+        print(move_line_coords)
+        return move_line_coords
+    else:
+        return False
+
+
+def if_queen_can_move(cell, p_m, enemy_color):
+    can_move = False
+    move_line = ''
+    if cell[0] > p_m[0] and cell[1] > p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x += 1
+                y += 1
+                move_line += brd[y][x][1]
+            if 'b' not in move_line.lower() and 'w' not in move_line.lower():
+                can_move = True
+
+    if cell[0] > p_m[0] and cell[1] < p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x += 1
+                y -= 1
+                move_line += brd[y][x][1]
+            if 'b' not in move_line.lower() and 'w' not in move_line.lower():
+                can_move = True
+    if cell[0] < p_m[0] and cell[1] > p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x -= 1
+                y += 1
+                move_line += brd[y][x][1]
+            if 'b' not in move_line.lower() and 'w' not in move_line.lower():
+                can_move = True
+    if cell[0] < p_m[0] and cell[1] < p_m[1]:
+        if brd[cell[1]][cell[0]][1] == '_':
+            x = p_m[0]
+            y = p_m[1]
+            for _ in range(abs(cell[1] - p_m[1]) - 1):
+                x -= 1
+                y -= 1
+                move_line += brd[y][x][1]
+            if 'b' not in move_line.lower() and 'w' not in move_line.lower():
+                can_move = True
+    if can_move:
+        return True
+    else:
+        return False
+
+
 def make_move(cell):
     global brd
     global history
@@ -140,11 +271,32 @@ def make_move(cell):
                 if brd[p_m[1]][p_m[0]] == 'bW__':
                     if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
                         if if_queen_can_beat(cell, p_m, 'bB'):
+                            for coords in if_queen_can_beat(cell, p_m, 'bB'):
+                                brd[coords[1]][coords[0]] = 'b___'
                             brd[p_m[1]][p_m[0]] = 'b___'
                             brd[cell[1]][cell[0]] = 'bW__'
+                            for i in range(7):
+                                for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
+                                               (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
+                                    if (next_cords[0] < 8 and next_cords[1] < 8) \
+                                            and (next_cords[0] >= 0 and next_cords[1] >= 0):
+                                        if if_queen_can_beat(next_cords, cell, 'bB')\
+                                                and brd[next_cords[1]][next_cords[0]][2] not in 'bB':
+                                            return
+                            who_moves = 'BLACK'
+                        if if_queen_can_move(cell, p_m, 'bB'):
+                            brd[cell[1]][cell[0]] = 'bW__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'BLACK'
+                elif brd[p_m[1]][p_m[0]] == 'bWt_':
+                    if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
+                        if if_queen_can_move(cell, p_m, 'bB'):
+                            brd[cell[1]][cell[0]] = 'bW__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'BLACK'
                 elif brd[p_m[1]][p_m[0]] == 'bwt_':
                     if cell[1] < p_m[1]:
-                        if abs(p_m[1] - cell[1]) == 1 or abs(p_m[0] - cell[0]) == 1:
+                        if abs(p_m[1] - cell[1]) == 1 and abs(p_m[0] - cell[0]) == 1:
                             if cell[1] == 0:
                                 brd[cell[1]][cell[0]] = 'bW__'
                             else:
@@ -168,12 +320,36 @@ def make_move(cell):
                                 if if_checker_can_beat(next_cords, cell, 'bB'):
                                     return
                         who_moves = 'BLACK'
-
-
             elif who_moves == 'BLACK':
+                if brd[p_m[1]][p_m[0]] == 'bB__':
+                    if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
+                        if if_queen_can_beat(cell, p_m, 'wW'):
+                            for coords in if_queen_can_beat(cell, p_m, 'wW'):
+                                brd[coords[1]][coords[0]] = 'b___'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            brd[cell[1]][cell[0]] = 'bB__'
+                            for i in range(7):
+                                for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
+                                               (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
+                                    if (next_cords[0] < 8 and next_cords[1] < 8) \
+                                            and (next_cords[0] >= 0 and next_cords[1] >= 0):
+                                        if if_queen_can_beat(next_cords, cell, 'wW')\
+                                                and brd[next_cords[1]][next_cords[0]][2] not in 'wW':
+                                            return
+                            who_moves = 'WHITE'
+                        if if_queen_can_move(cell, p_m, 'wW'):
+                            brd[cell[1]][cell[0]] = 'bB__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'WHITE'
+                elif brd[p_m[1]][p_m[0]] == 'bBt_':
+                    if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
+                        if if_queen_can_move(cell, p_m, 'wW'):
+                            brd[cell[1]][cell[0]] = 'bB__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'WHITE'
                 if brd[p_m[1]][p_m[0]] == 'bbt_':
                     if cell[1] > p_m[1]:
-                        if abs(p_m[1] - cell[1]) == 1 or abs(p_m[0] - cell[0]) == 1:
+                        if abs(p_m[1] - cell[1]) == 1 and abs(p_m[0] - cell[0]) == 1:
                             if cell[1] == 7:
                                 brd[cell[1]][cell[0]] = 'bB__'
                             else:
