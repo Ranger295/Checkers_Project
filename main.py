@@ -54,6 +54,79 @@ def load_image(name, colorkey=None):
     return image
 
 
+def set_selection(cell):
+    global brd
+    global history
+
+    if cell != history[-2] and brd[cell[1]][cell[0]][0] == 'b':
+        # p_m = previous_move
+        if history[-2] != 0:
+            p_m = history[-2]
+            if brd[cell[1]][cell[0]][1] == '_' and (abs(p_m[1] - cell[1]) != 1 or abs(p_m[0] - cell[0]) != 1):
+                y = 0
+                x = 0
+                for row in brd:
+                    for cell2 in row:
+                        brd[x][y] = brd[x][y][:2] + '__'
+                        x += 1
+                    y += 1
+                    x = 0
+                return
+        y = 0
+        x = 0
+        for row in brd:
+            for cell2 in row:
+                brd[x][y] = brd[x][y][:2] + '__'
+                x += 1
+            y += 1
+            x = 0
+        brd[cell[1]][cell[0]] = (brd[cell[1]][cell[0]])[:2] + 't' + '_'
+        # p_m = previous_move
+        if history[-2] != 0:
+            p_m = history[-2]
+            if brd[p_m[1]][p_m[0]][1] != '' and brd[cell[1]][cell[0]][1] == '_':
+                brd[p_m[1]][p_m[0]] = (brd[p_m[1]][p_m[0]])[:2] + 't' + '_'
+    else:
+        if brd[cell[1]][cell[0]][0] == 'b':
+            if brd[cell[1]][cell[0]][2] == '_':
+                brd[cell[1]][cell[0]] = (brd[cell[1]][cell[0]])[:2] + 't' + '_'
+            else:
+                brd[cell[1]][cell[0]] = (brd[cell[1]][cell[0]])[:2] + '_' + '_'
+        else:
+            y = 0
+            x = 0
+            for row in brd:
+                for cell2 in row:
+                    brd[x][y] = brd[x][y][:2] + '__'
+                    x += 1
+                y += 1
+                x = 0
+
+
+def if_checker_can_beat(cell, p_m, enemy_color):
+    can_beat = False
+    if cell[0] > p_m[0] and cell[1] > p_m[1]:
+        if brd[p_m[1] + 1][p_m[0] + 1][1] in enemy_color and brd[cell[1]][cell[0]][1] == '_':
+            beaten_figure_pos = p_m[1] + 1, p_m[0] + 1
+            can_beat = True
+    if cell[0] > p_m[0] and cell[1] < p_m[1]:
+        if brd[p_m[1] - 1][p_m[0] + 1][1] in enemy_color and brd[cell[1]][cell[0]][1] == '_':
+            beaten_figure_pos = p_m[1] - 1, p_m[0] + 1
+            can_beat = True
+    if cell[0] < p_m[0] and cell[1] > p_m[1]:
+        if brd[p_m[1] + 1][p_m[0] - 1][1] in enemy_color and brd[cell[1]][cell[0]][1] == '_':
+            beaten_figure_pos = p_m[1] + 1, p_m[0] - 1
+            can_beat = True
+    if cell[0] < p_m[0] and cell[1] < p_m[1]:
+        if brd[p_m[1] - 1][p_m[0] - 1][1] in enemy_color and brd[cell[1]][cell[0]][1] == '_':
+            beaten_figure_pos = p_m[1] - 1, p_m[0] - 1
+            can_beat = True
+    if can_beat:
+        return beaten_figure_pos
+    else:
+        return False
+
+
 def make_move(cell):
     global brd
     global history
