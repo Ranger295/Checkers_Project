@@ -127,6 +127,110 @@ def if_checker_can_beat(cell, p_m, enemy_color):
         return False
 
 
+def make_move(cell):
+    global brd
+    global history
+    global who_moves
+    can_beat = False
+    # p_m = previous_move
+    if history[-2] != 0:
+        p_m = history[-2]
+        if cell != p_m:
+            if who_moves == 'WHITE':
+                if brd[p_m[1]][p_m[0]] == 'bW__':
+                    if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
+                        if if_queen_can_beat(cell, p_m, 'bB'):
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            brd[cell[1]][cell[0]] = 'bW__'
+                elif brd[p_m[1]][p_m[0]] == 'bwt_':
+                    if cell[1] < p_m[1]:
+                        if abs(p_m[1] - cell[1]) == 1 or abs(p_m[0] - cell[0]) == 1:
+                            if cell[1] == 0:
+                                brd[cell[1]][cell[0]] = 'bW__'
+                            else:
+                                brd[cell[1]][cell[0]] = 'bw__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'BLACK'
+                elif brd[p_m[1]][p_m[0]] == 'bw__':
+                    if abs(p_m[1] - cell[1]) == 2 and abs(p_m[0] - cell[0]) == 2:
+                        if if_checker_can_beat(cell, p_m, 'bB'):
+                            beaten_figure_pos = if_checker_can_beat(cell, p_m, 'bB')
+                            brd[beaten_figure_pos[0]][beaten_figure_pos[1]] = 'b___'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            if cell[1] == 0:
+                                brd[cell[1]][cell[0]] = 'bW__'
+                            else:
+                                brd[cell[1]][cell[0]] = 'bw__'
+                        for next_cords in [(cell[0] + 2, cell[1] + 2), (cell[0] + 2, cell[1] - 2), \
+                                           (cell[0] - 2, cell[1] + 2), (cell[0] - 2, cell[1] - 2)]:
+                            if (next_cords[0] < 8 and next_cords[1] < 8) \
+                                    and (next_cords[0] >= 0 and next_cords[1] >= 0):
+                                if if_checker_can_beat(next_cords, cell, 'bB'):
+                                    return
+                        who_moves = 'BLACK'
+
+
+            elif who_moves == 'BLACK':
+                if brd[p_m[1]][p_m[0]] == 'bbt_':
+                    if cell[1] > p_m[1]:
+                        if abs(p_m[1] - cell[1]) == 1 or abs(p_m[0] - cell[0]) == 1:
+                            if cell[1] == 7:
+                                brd[cell[1]][cell[0]] = 'bB__'
+                            else:
+                                brd[cell[1]][cell[0]] = 'bb__'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            who_moves = 'WHITE'
+                elif brd[p_m[1]][p_m[0]] == 'bb__':
+                    if abs(p_m[1] - cell[1]) == 2 and abs(p_m[0] - cell[0]) == 2:
+                        if if_checker_can_beat(cell, p_m, 'wW'):
+                            beaten_figure_pos = if_checker_can_beat(cell, p_m, 'wW')
+                            brd[beaten_figure_pos[0]][beaten_figure_pos[1]] = 'b___'
+                            brd[p_m[1]][p_m[0]] = 'b___'
+                            if cell[1] == 7:
+                                brd[cell[1]][cell[0]] = 'bB__'
+                            else:
+                                brd[cell[1]][cell[0]] = 'bb__'
+                        for next_cords in [(cell[0] + 2, cell[1] + 2), (cell[0] + 2, cell[1] - 2), \
+                                           (cell[0] - 2, cell[1] + 2), (cell[0] - 2, cell[1] - 2)]:
+                            if (next_cords[0] < 8 and next_cords[1] < 8) \
+                                    and (next_cords[0] >= 0 and next_cords[1] >= 0):
+                                if if_checker_can_beat(next_cords, cell, 'wW'):
+                                    return
+                        who_moves = 'WHITE'
+        else:
+            pass
+
+
+def update_game_field():
+    global brd
+    for item in all_sprites:
+        item.kill()
+    pos = [4, 104]
+    for row in brd:
+        for cell in row:
+            if list(cell)[1] == 'b':
+                icon_png = 'b_c.png'
+            if list(cell)[1] == 'w':
+                icon_png = 'w_c.png'
+            if list(cell)[1] == 'B':
+                icon_png = 'b_q.png'
+            if list(cell)[1] == 'W':
+                icon_png = 'w_q.png'
+            if cell == 'bbt_':
+                icon_png = 'b_c_c.png'
+            if cell == 'bwt_':
+                icon_png = 'w_c_c.png'
+            if cell == 'bBt_':
+                icon_png = 'b_q_c.png'
+            if cell == 'bWt_':
+                icon_png = 'w_q_c.png'
+            if list(cell)[1] != '_':
+                sprite_adder(all_sprites, icon_png, pos)
+            pos[0] += 80
+        pos = [4, pos[1]]
+        pos[1] += 80
+
+
 class Checkers_Board:
     def __init__(self, width, height, left=10, top=10, cell_size=30):
         self.width = width
