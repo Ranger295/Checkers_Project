@@ -13,13 +13,24 @@ clear_brd = [['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
              ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___']]
 
 queen_move_variants = ['Wb_', 'W_b_', 'Wb__', 'Wb_b_', 'W_b__', 'W__b_', 'Wb_b__',
-                       'Wb__b_', 'Wb____', 'W_b_b_', 'W__b__', 'W___b_Wb_b_b_',
+                       'Wb__b_', 'Wb____', 'W___b_', 'W_b_b_', 'W__b__', 'W___b_Wb_b_b_',
                        'Wb_b___', 'Wb__b__', 'Wb___b_', 'Wb_____', 'W_b_b__',
                        'W_b__b_', 'W_b____', 'W__b_b_', 'W___b__', 'W____b_Wb_b_b__',
                        'Wb_b__b_', 'Wb__b_b_', 'Wb_b____', 'Wb__b___', 'Wb___b__',
                        'Wb____b_', 'Wb______', 'W_b_b_b_', 'W_b_b___', 'W_b__b__W_b___b_',
                        'W__b_b__', 'W__b__b_', 'W___b_b_', 'W_b_____', 'W__b____',
-                       'W___b___', 'W____b__', 'W_____b_']
+                       'W___b___', 'W____b__', 'W_____b_',
+                       'Bw_', 'B_w_', 'Bw__', 'Bw_w_', 'B_w__', 'B__w_',
+                       'Bw_w__', "  'Bw__w_", 'Bw____', 'B___w_',
+                       'B_w_w_', 'B__w__', 'B___w_Bw_w_w_', "  'Bw_w___",
+                       'Bw__w__', 'Bw___w_', 'Bw_____', 'B_w_w__',
+                       "  'B_w__w_", 'B_w____', 'B__w_w_', 'B___w__',
+                       'B____w_Bw_w_w__', "  'Bw_w__w_", 'Bw__w_w_',
+                       'Bw_w____', 'Bw__w___', 'Bw___w__', "  'Bw____w_",
+                       'Bw______', 'B_w_w_w_', 'B_w_w___',
+                       'B_w__w__B_w___w_', "  'B__w_w__", 'B__w__w_',
+                       'B___w_w_', 'B_w_____', 'B__w____', "  'B___w___",
+                       'B____w__', 'B_____w_']
 
 history = [0, 0, 0]
 who_moves = 'WHITE'
@@ -31,23 +42,6 @@ all_sprites = pygame.sprite.Group()
 
 checker_move_sound = pygame.mixer.Sound("data/checker_movement_sound.ogg")
 end_of_the_game_sound = ''
-
-
-
-
-def start_new_game():
-    global brd
-    brd = [['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
-           ['bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___'],
-           ['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
-           ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
-           ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
-           ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___'],
-           ['w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__'],
-           ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___']]
-
-
-start_new_game()
 
 
 def load_image(name, colorkey=None):
@@ -64,6 +58,47 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
+
+class sprite_adder(pygame.sprite.Sprite):
+    def __init__(self, all_sprites, sprite_name, pos):
+        super().__init__(all_sprites)
+        self.image = load_image(sprite_name)
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+
+    def update(self):
+        pass
+
+
+def start_new_game():
+    global brd
+    brd = [['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
+           ['bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___'],
+           ['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
+           ['b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___'],
+           ['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
+           ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___'],
+           ['w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__'],
+           ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___']]
+
+
+def load_menu():
+    global who_moves
+    if who_moves == 'WHITE':
+        sprite_adder(all_sprites, 'next_move_white.png', (166, 4))
+    else:
+        sprite_adder(all_sprites, 'next_move_black.png', (166, 4))
+    sprite_adder(all_sprites, 'close_game.png', (4, 4))
+    sprite_adder(all_sprites, 'new_game.png', (486, 4))
+
+
+
+
+start_new_game()
+load_menu()
 
 
 def set_selection(cell):
@@ -283,10 +318,10 @@ def make_move(cell):
                             checker_move_sound.play()
                             for i in range(7):
                                 for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
-                                               (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
+                                                   (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
                                     if (next_cords[0] < 8 and next_cords[1] < 8) \
                                             and (next_cords[0] >= 0 and next_cords[1] >= 0):
-                                        if if_queen_can_beat(next_cords, cell, 'bB')\
+                                        if if_queen_can_beat(next_cords, cell, 'bB') \
                                                 and brd[next_cords[1]][next_cords[0]][2] not in 'bB':
                                             return
                             who_moves = 'BLACK'
@@ -341,10 +376,10 @@ def make_move(cell):
                             checker_move_sound.play()
                             for i in range(7):
                                 for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
-                                               (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
+                                                   (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
                                     if (next_cords[0] < 8 and next_cords[1] < 8) \
                                             and (next_cords[0] >= 0 and next_cords[1] >= 0):
-                                        if if_queen_can_beat(next_cords, cell, 'wW')\
+                                        if if_queen_can_beat(next_cords, cell, 'wW') \
                                                 and brd[next_cords[1]][next_cords[0]][2] not in 'wW':
                                             return
                             who_moves = 'WHITE'
@@ -360,7 +395,7 @@ def make_move(cell):
                             brd[p_m[1]][p_m[0]] = 'b___'
                             checker_move_sound.play()
                             who_moves = 'WHITE'
-                if brd[p_m[1]][p_m[0]] == 'bbt_':
+                elif brd[p_m[1]][p_m[0]] == 'bbt_':
                     if cell[1] > p_m[1]:
                         if abs(p_m[1] - cell[1]) == 1 and abs(p_m[0] - cell[0]) == 1:
                             if cell[1] == 7:
@@ -390,6 +425,18 @@ def make_move(cell):
                         who_moves = 'WHITE'
         else:
             pass
+    white_checkers = 0
+    black_checkers = 0
+    for row in brd:
+        for cell in row:
+            if cell[1] in 'bB':
+                black_checkers += 1
+            if cell[1] in 'wW':
+                white_checkers += 1
+    if black_checkers == 0:
+        sprite_adder(all_sprites, 'new_game.png', (486, 4))
+    if white_checkers == 0:
+        sprite_adder(all_sprites, 'new_game.png', (486, 4))
 
 
 def update_game_field():
@@ -422,6 +469,14 @@ def update_game_field():
         pos[1] += 80
 
 
+def press_the_button(mouse_pos):
+    x = mouse_pos[0]
+    y = mouse_pos[1]
+    print(x, y)
+    if x in range(4, 164) and y in range(4,96):
+        print(True)
+
+
 class Checkers_Board:
     def __init__(self, width, height, left=10, top=10, cell_size=30):
         self.width = width
@@ -449,7 +504,15 @@ class Checkers_Board:
 
     def get_click(self, mouse_pos):
         global history
+        global who_moves
         cell = self.get_cell(mouse_pos)
+        x = mouse_pos[0]
+        y = mouse_pos[1]
+        if x in range(4, 158) and y in range(4, 96):
+            sys.exit()
+        if x in range(482, 644) and y in range(4, 96):
+            start_new_game()
+            who_moves = 'WHITE'
         if cell != None:
             history.append(cell)
             set_selection(cell)
@@ -457,6 +520,8 @@ class Checkers_Board:
             if history[-2] != 0:
                 print("prev_cell:", history[-2], brd[history[-2][1]][history[-2][0]], "now_cell:", cell,
                       brd[cell[1]][cell[0]])
+        else:
+            press_the_button(mouse_pos)
 
     def get_cell(self, mouse_pos):
         cell_x = (mouse_pos[0] - self.left) // self.cell_size
@@ -465,19 +530,6 @@ class Checkers_Board:
             return None
         else:
             return cell_x, cell_y
-
-
-class sprite_adder(pygame.sprite.Sprite):
-    def __init__(self, all_sprites, figure_name, pos):
-        super().__init__(all_sprites)
-        self.image = load_image(figure_name)
-        self.rect = self.image.get_rect()
-        self.mask = pygame.mask.from_surface(self.image)
-        self.rect.x = pos[0]
-        self.rect.y = pos[1]
-
-    def update(self):
-        pass
 
 
 checkers_board = Checkers_Board(8, 8, 4, 104, 80)
@@ -492,6 +544,7 @@ while running:
     # checkers_board.render(screen)
     screen.fill((0, 0, 0))
     update_game_field()
+    load_menu()
     screen.blit(load_image("Checkers_Board.png"), (0, 100))
     all_sprites.draw(screen)
     # text = "\n".join(["   ".join(x) for x in brd])
