@@ -1,5 +1,3 @@
-from random import random
-
 import pygame
 import os
 import sys
@@ -22,6 +20,7 @@ queen_move_variants = ['Wb_', 'W_b_', 'Wb__', 'Wb_b_', 'W_b__', 'W__b_', 'Wb_b__
                        'Wb____b_', 'Wb______', 'W_b_b_b_', 'W_b_b___', 'W_b__b__W_b___b_',
                        'W__b_b__', 'W__b__b_', 'W___b_b_', 'W_b_____', 'W__b____',
                        'W___b___', 'W____b__', 'W_____b_']
+
 history = [0, 0, 0]
 who_moves = 'WHITE'
 pygame.init()
@@ -29,6 +28,11 @@ pygame.font.init()
 size = 648, 748
 screen = pygame.display.set_mode(size)
 all_sprites = pygame.sprite.Group()
+
+checker_move_sound = pygame.mixer.Sound("data/checker_movement_sound.ogg")
+end_of_the_game_sound = ''
+
+
 
 
 def start_new_game():
@@ -262,6 +266,7 @@ def make_move(cell):
     global brd
     global history
     global who_moves
+    global checker_move_sound
     can_beat = False
     # p_m = previous_move
     if history[-2] != 0:
@@ -275,6 +280,7 @@ def make_move(cell):
                                 brd[coords[1]][coords[0]] = 'b___'
                             brd[p_m[1]][p_m[0]] = 'b___'
                             brd[cell[1]][cell[0]] = 'bW__'
+                            checker_move_sound.play()
                             for i in range(7):
                                 for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
                                                (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
@@ -287,12 +293,14 @@ def make_move(cell):
                         if if_queen_can_move(cell, p_m, 'bB'):
                             brd[cell[1]][cell[0]] = 'bW__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'BLACK'
                 elif brd[p_m[1]][p_m[0]] == 'bWt_':
                     if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
                         if if_queen_can_move(cell, p_m, 'bB'):
                             brd[cell[1]][cell[0]] = 'bW__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'BLACK'
                 elif brd[p_m[1]][p_m[0]] == 'bwt_':
                     if cell[1] < p_m[1]:
@@ -302,6 +310,7 @@ def make_move(cell):
                             else:
                                 brd[cell[1]][cell[0]] = 'bw__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'BLACK'
                 elif brd[p_m[1]][p_m[0]] == 'bw__':
                     if abs(p_m[1] - cell[1]) == 2 and abs(p_m[0] - cell[0]) == 2:
@@ -313,6 +322,7 @@ def make_move(cell):
                                 brd[cell[1]][cell[0]] = 'bW__'
                             else:
                                 brd[cell[1]][cell[0]] = 'bw__'
+                            checker_move_sound.play()
                         for next_cords in [(cell[0] + 2, cell[1] + 2), (cell[0] + 2, cell[1] - 2), \
                                            (cell[0] - 2, cell[1] + 2), (cell[0] - 2, cell[1] - 2)]:
                             if (next_cords[0] < 8 and next_cords[1] < 8) \
@@ -328,6 +338,7 @@ def make_move(cell):
                                 brd[coords[1]][coords[0]] = 'b___'
                             brd[p_m[1]][p_m[0]] = 'b___'
                             brd[cell[1]][cell[0]] = 'bB__'
+                            checker_move_sound.play()
                             for i in range(7):
                                 for next_cords in [(cell[0] + i, cell[1] + i), (cell[0] + i, cell[1] - i), \
                                                (cell[0] - i, cell[1] + i), (cell[0] - i, cell[1] - i)]:
@@ -340,12 +351,14 @@ def make_move(cell):
                         if if_queen_can_move(cell, p_m, 'wW'):
                             brd[cell[1]][cell[0]] = 'bB__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'WHITE'
                 elif brd[p_m[1]][p_m[0]] == 'bBt_':
                     if abs(p_m[1] - cell[1]) == abs(p_m[0] - cell[0]):
                         if if_queen_can_move(cell, p_m, 'wW'):
                             brd[cell[1]][cell[0]] = 'bB__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'WHITE'
                 if brd[p_m[1]][p_m[0]] == 'bbt_':
                     if cell[1] > p_m[1]:
@@ -355,6 +368,7 @@ def make_move(cell):
                             else:
                                 brd[cell[1]][cell[0]] = 'bb__'
                             brd[p_m[1]][p_m[0]] = 'b___'
+                            checker_move_sound.play()
                             who_moves = 'WHITE'
                 elif brd[p_m[1]][p_m[0]] == 'bb__':
                     if abs(p_m[1] - cell[1]) == 2 and abs(p_m[0] - cell[0]) == 2:
@@ -366,6 +380,7 @@ def make_move(cell):
                                 brd[cell[1]][cell[0]] = 'bB__'
                             else:
                                 brd[cell[1]][cell[0]] = 'bb__'
+                            checker_move_sound.play()
                         for next_cords in [(cell[0] + 2, cell[1] + 2), (cell[0] + 2, cell[1] - 2), \
                                            (cell[0] - 2, cell[1] + 2), (cell[0] - 2, cell[1] - 2)]:
                             if (next_cords[0] < 8 and next_cords[1] < 8) \
