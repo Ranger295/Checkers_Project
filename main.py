@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import os
 import sys
@@ -14,7 +16,7 @@ clear_brd = [['w___', 'b___', 'w___', 'b___', 'w___', 'b___', 'w___', 'b___'],
 
 queen_move_variants = ['Wb_', 'W_b_', 'Wb__', 'Wb_b_', 'W_b__', 'W__b_', 'Wb_b__',
                        'Wb__b_', 'Wb____', 'W___b_', 'W_b_b_', 'W__b__', 'W___b_Wb_b_b_',
-                       'Wb_b___', 'Wb__b__', 'Wb___b_', 'Wb_____', 'W_b_b__',
+                       'Wb_b___', 'Wb___', 'Wb__b__', 'Wb___b_', 'Wb_____', 'W_b_b__',
                        'W_b__b_', 'W_b____', 'W__b_b_', 'W___b__', 'W____b_Wb_b_b__',
                        'Wb_b__b_', 'Wb__b_b_', 'Wb_b____', 'Wb__b___', 'Wb___b__',
                        'Wb____b_', 'Wb______', 'W_b_b_b_', 'W_b_b___', 'W_b__b__W_b___b_',
@@ -32,16 +34,21 @@ queen_move_variants = ['Wb_', 'W_b_', 'Wb__', 'Wb_b_', 'W_b__', 'W__b_', 'Wb_b__
                        'B___w_w_', 'B_w_____', 'B__w____', "  'B___w___",
                        'B____w__', 'B_____w_']
 
+screen_rect = (0, 0, 648, 748)
 history = [0, 0, 0]
+who_winner = ''
 who_moves = 'WHITE'
 pygame.init()
-pygame.font.init()
 size = 648, 748
 screen = pygame.display.set_mode(size)
 all_sprites = pygame.sprite.Group()
+prtc_sprites = pygame.sprite.Group()
+pygame.display.set_caption('Шашки для двоих')
+programIcon = pygame.image.load('data\icon.png')
+pygame.display.set_icon(programIcon)
 
 checker_move_sound = pygame.mixer.Sound("data/checker_movement_sound.ogg")
-end_of_the_game_sound = ''
+end_of_the_game_sound = pygame.mixer.Sound("data/winner_sound.ogg")
 
 
 def load_image(name, colorkey=None):
@@ -75,6 +82,7 @@ class sprite_adder(pygame.sprite.Sprite):
 
 def start_new_game():
     global brd
+    global who_winner
     brd = [['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
            ['bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___'],
            ['w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__', 'w___', 'bb__'],
@@ -83,14 +91,20 @@ def start_new_game():
            ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___'],
            ['w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__'],
            ['bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___', 'bw__', 'w___']]
+    who_winner = ''
 
 
 def load_menu():
     global who_moves
+    global who_winner
     if who_moves == 'WHITE':
         sprite_adder(all_sprites, 'next_move_white.png', (166, 4))
     else:
         sprite_adder(all_sprites, 'next_move_black.png', (166, 4))
+    if who_winner == 'White':
+        sprite_adder(all_sprites, 'white_won.png', (166, 4))
+    if who_winner == 'Black':
+        sprite_adder(all_sprites, 'black_won.png', (166, 4))
     sprite_adder(all_sprites, 'close_game.png', (4, 4))
     sprite_adder(all_sprites, 'new_game.png', (486, 4))
 
@@ -300,8 +314,10 @@ def if_queen_can_move(cell, p_m, enemy_color):
 def make_move(cell):
     global brd
     global history
+    global who_winner
     global who_moves
     global checker_move_sound
+    global end_of_the_game_sound
     can_beat = False
     # p_m = previous_move
     if history[-2] != 0:
@@ -434,9 +450,21 @@ def make_move(cell):
             if cell[1] in 'wW':
                 white_checkers += 1
     if black_checkers == 0:
-        sprite_adder(all_sprites, 'new_game.png', (486, 4))
+        who_winner = 'White'
+        end_of_the_game_sound.play()
+        for i in range(3):
+            for pos in [(114, 104), (244, 114), (354, 104), (484, 114),
+                        (124, 234), (234, 224), (364, 234), (474, 224),
+                        (104, 214), (254, 204), (344, 214), (494, 204)]:
+                create_particles(pos, 'WHITE')
     if white_checkers == 0:
-        sprite_adder(all_sprites, 'new_game.png', (486, 4))
+        who_winner = 'Black'
+        end_of_the_game_sound.play()
+        for i in range(3):
+            for pos in [(114, 104), (244, 114), (354, 104), (484, 114),
+                        (124, 234), (234, 224), (364, 234), (474, 224),
+                        (104, 214), (254, 204), (344, 214), (494, 204)]:
+                create_particles(pos, 'BLACK')
 
 
 def update_game_field():
@@ -469,26 +497,16 @@ def update_game_field():
         pos[1] += 80
 
 
-def press_the_button(mouse_pos):
-    x = mouse_pos[0]
-    y = mouse_pos[1]
-    print(x, y)
-    if x in range(4, 164) and y in range(4,96):
-        print(True)
-
-
 class Checkers_Board:
     def __init__(self, width, height, left=10, top=10, cell_size=30):
         self.width = width
         self.height = height
         self.board = [[0] * width for _ in range(height)]
-        # значения по умолчанию
         self.left = 0
         self.top = 0
         self.cell_size = 0
         self.set_view(left, top, cell_size)
 
-    # настройка внешнего вида
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
@@ -520,8 +538,7 @@ class Checkers_Board:
             if history[-2] != 0:
                 print("prev_cell:", history[-2], brd[history[-2][1]][history[-2][0]], "now_cell:", cell,
                       brd[cell[1]][cell[0]])
-        else:
-            press_the_button(mouse_pos)
+
 
     def get_cell(self, mouse_pos):
         cell_x = (mouse_pos[0] - self.left) // self.cell_size
@@ -532,8 +549,40 @@ class Checkers_Board:
             return cell_x, cell_y
 
 
-checkers_board = Checkers_Board(8, 8, 4, 104, 80)
+class Particle(pygame.sprite.Sprite):
+    def __init__(self, pos, dx, dy, winner):
+        super().__init__(prtc_sprites)
+        if winner == 'WHITE':
+            name = 'w_q.png'
+            sprite_adder(all_sprites, 'white_won.png', (164 ,344))
+        else:
+            name = 'b_q.png'
+        self.fire = [load_image(name)]
+        for scale in (12, 15, 18, 21, 24, 27, 30, 33, 36, 39):
+            self.fire.append(pygame.transform.scale(self.fire[0], (scale, scale)))
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = 0.05
 
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position, winner):
+    particle_count = 8
+    numbers = range(-6, 7)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers), winner)
+
+
+checkers_board = Checkers_Board(8, 8, 4, 104, 80)
+clock = pygame.time.Clock()
 running = True
 while running:
     for event in pygame.event.get():
@@ -541,17 +590,18 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             checkers_board.get_click(event.pos)
+
     # checkers_board.render(screen)
+    all_sprites.update()
+    prtc_sprites.update()
     screen.fill((0, 0, 0))
+    all_sprites.draw(screen)
     update_game_field()
     load_menu()
     screen.blit(load_image("Checkers_Board.png"), (0, 100))
     all_sprites.draw(screen)
-    # text = "\n".join(["   ".join(x) for x in brd])
-    # print(text)
-    # my_font = pygame.font.SysFont('Calibri', 30)
-    # text_surface = my_font.render(text, False, (255, 255, 255))
     # screen.blit(text_surface, (0, 0))
+    prtc_sprites.draw(screen)
     pygame.display.flip()
-    all_sprites.update()
+    clock.tick(60)
 pygame.quit()
