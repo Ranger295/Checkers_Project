@@ -1,0 +1,1 @@
+movement_count:0,white_beaten:0,black_beaten:0
